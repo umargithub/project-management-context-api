@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { ProjectContext } from "../store/project-context";
 
-export default function Form({ handleCancelProject, handleAddProject }) {
+export default function Form() {
+  const { addProject, cancelProject } = useContext(ProjectContext);
   const title = useRef();
   const description = useRef();
   const date = useRef();
@@ -12,7 +14,7 @@ export default function Form({ handleCancelProject, handleAddProject }) {
       setError(true);
       return;
     }
-    handleAddProject(title, description, date);
+    addProject({ title, description, date });
     setError(false);
   }
 
@@ -21,7 +23,7 @@ export default function Form({ handleCancelProject, handleAddProject }) {
       <div className="max-w-2xl">
         <div className="flex justify-end gap-4 mb-8">
           <button
-            onClick={handleCancelProject}
+            onClick={cancelProject}
             className="px-6 py-2 text-stone-800 hover:text-stone-600"
           >
             Cancel

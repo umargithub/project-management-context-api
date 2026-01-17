@@ -1,13 +1,12 @@
+import { useContext } from "react";
 import { formatDate } from "../utils/dateFormatter";
 import Todo from "./Todo";
 import TodoForm from "./TodoForm";
+import { ProjectContext } from "../store/project-context";
 
-export default function ProjectDetails({
-  project,
-  onDelete,
-  addTodo,
-  deleteTodo,
-}) {
+export default function ProjectDetails() {
+  const { deleteProject, selectedProject: project } =
+    useContext(ProjectContext);
   return (
     <main className="flex-1 p-16">
       <div className="max-w-3xl">
@@ -25,7 +24,7 @@ export default function ProjectDetails({
             <p className="text-stone-700">{project.description}</p>
           </div>
           <button
-            onClick={onDelete}
+            onClick={() => deleteProject(project.id)}
             className="px-6 py-2 text-white hover:bg-red-500 bg-red-400 rounded-md font-bold cursor-pointer"
           >
             Delete
@@ -37,13 +36,11 @@ export default function ProjectDetails({
         <div>
           <h2 className="text-stone-800 text-2xl font-bold mb-6">Tasks</h2>
 
-          <TodoForm addTodo={addTodo} />
+          <TodoForm />
 
           <div className="space-y-4">
-            {project.todos &&
-              project.todos.map((todo) => (
-                <Todo key={todo.id} todo={todo} deleteTodo={deleteTodo} />
-              ))}
+            {project.tasks &&
+              project.tasks.map((task) => <Todo key={task.id} todo={task} />)}
           </div>
         </div>
       </div>

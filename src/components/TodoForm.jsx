@@ -1,6 +1,8 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { ProjectContext } from "../store/project-context";
 
-export default function TodoForm({ addTodo }) {
+export default function TodoForm() {
+  const { addTask } = useContext(ProjectContext);
   const todo = useRef();
 
   function handleAddTodo(value) {
@@ -11,7 +13,7 @@ export default function TodoForm({ addTodo }) {
       id: crypto.randomUUID(),
       title: value,
     };
-    addTodo(newTodo);
+    addTask(newTodo);
     todo.current.value = "";
   }
   return (

@@ -1,6 +1,9 @@
+import { useContext } from "react";
 import clipboard from "../assets/no-projects.png";
+import { ProjectContext } from "../store/project-context";
 
-export default function NoProject({ handleNewProject }) {
+export default function NoProject() {
+  const { addNewProject } = useContext(ProjectContext);
   return (
     <main className="flex-1 flex flex-col items-center justify-center p-16">
       <img
@@ -15,7 +18,7 @@ export default function NoProject({ handleNewProject }) {
         Select a project or get started with a new one
       </p>
       <button
-        onClick={handleNewProject}
+        onClick={addNewProject}
         className="px-8 py-4 bg-stone-800 text-stone-300 rounded-lg hover:bg-stone-700 transition"
       >
         Create new project
