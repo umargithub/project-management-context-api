@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useReducer, useState } from "react";
 
 export const ProjectContext = createContext({
   projects: [],
@@ -13,65 +13,134 @@ export const ProjectContext = createContext({
   deleteTask: () => {},
 });
 
-export function ProjectContextProvider({ children }) {
-  const [projects, setProjects] = useState([]);
-  const [selectedProjectId, setSelectedProjectId] = useState(undefined);
+function projectsReducer(state, action) {
+  switch (action.type) {
+    case "SELECT_PROJECT":
+      return {
+        ...state,
+        selectedProjectId: action.payload,
+      };
 
-  const selectedProject = projects.find(
-    (project) => project.id === selectedProjectId
+    case "ADD_NEW_PROJECT":
+      return {
+        ...state,
+        selectedProjectId: null,
+      };
+
+    case "ADD_PROJECT":
+      const newProject = { id: crypto.randomUUID(), ...action.payload };
+      return {
+        projects: [newProject, ...state.projects],
+        selectedProjectId: newProject.id,
+      };
+
+    case "CANCEL_PROJECT":
+      return {
+        ...state,
+        selectedProjectId: undefined,
+      };
+
+    case "DELETE_PROJECT":
+      return {
+        projects: state.projects.filter(
+          (project) => project.id !== action.payload,
+        ),
+        selectedProjectId:
+          state.selectedProjectId === action.payload
+            ? undefined
+            : state.selectedProjectId,
+      };
+
+    case "ADD_TASK":
+      return {
+        ...state,
+        projects: state.projects.map((project) =>
+          project.id === state.selectedProjectId
+            ? { ...project, tasks: [action.payload, ...(project.tasks || [])] }
+            : project,
+        ),
+      };
+
+    case "DELETE_TASK":
+      return {
+        ...state,
+        projects: state.projects.map((project) =>
+          project.id === state.selectedProjectId
+            ? {
+                ...project,
+                tasks: project?.tasks.filter(
+                  (task) => task.id !== action.payload,
+                ),
+              }
+            : project,
+        ),
+      };
+
+    default:
+      return state;
+  }
+}
+
+export function ProjectContextProvider({ children }) {
+  const [projectState, projectsDispatch] = useReducer(projectsReducer, {
+    projects: [],
+    selectedProjectId: undefined,
+  });
+
+  const selectedProject = projectState.projects.find(
+    (project) => project.id === projectState.selectedProjectId,
   );
 
   function selectProject(id) {
-    setSelectedProjectId(id);
+    projectsDispatch({
+      type: "SELECT_PROJECT",
+      payload: id,
+    });
   }
 
   function addNewProject() {
-    setSelectedProjectId(null);
+    projectsDispatch({
+      type: "ADD_NEW_PROJECT",
+    });
   }
 
   function addProject(project) {
-    const newProject = { id: crypto.randomUUID(), ...project };
-    setProjects((prevProjects) => [newProject, ...prevProjects]);
-    setSelectedProjectId(newProject.id);
+    projectsDispatch({
+      type: "ADD_PROJECT",
+      payload: project,
+    });
   }
 
   function cancelProject() {
-    setSelectedProjectId(undefined);
+    projectsDispatch({
+      type: "CANCEL_PROJECT",
+    });
   }
 
   function deleteProject(id) {
-    setProjects((prevProjects) =>
-      prevProjects.filter((project) => project.id !== id)
-    );
-    setSelectedProjectId((prevId) => (prevId === id ? undefined : prevId));
+    projectsDispatch({
+      type: "DELETE_PROJECT",
+      payload: id,
+    });
   }
 
   function addTask(task) {
-    setProjects((prevProjects) => {
-      return prevProjects.map((project) =>
-        project.id === selectedProjectId
-          ? { ...project, tasks: [task, ...(project.tasks || [])] }
-          : project
-      );
+    projectsDispatch({
+      type: "ADD_TASK",
+      payload: task,
     });
   }
 
   function deleteTask(id) {
-    setProjects((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === selectedProjectId
-          ? {
-              ...project,
-              tasks: project?.tasks.filter((task) => task.id !== id),
-            }
-          : project
-      )
-    );
+    projectsDispatch({
+      type: "DELETE_TASK",
+      payload: id,
+    });
   }
 
   const contextValue = {
-    projects,
-    selectedProjectId,
+    projects: projectState.projects,
+    selectedProjectId: projectState.selectedProjectId,
     selectedProject,
     addNewProject,
     addProject,
