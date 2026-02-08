@@ -30,7 +30,7 @@ A React-based project management application for organizing projects and tasks.
 ## Installation
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/umargithub/project-management-context-api
 
 # Navigate to project directory
 cd project-management-context-api
